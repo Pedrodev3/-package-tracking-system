@@ -1,5 +1,8 @@
 package br.com.pedrovictor.sistlog.domain;
 
+import lombok.Getter;
+
+@Getter
 public enum PackageStatus {
     CREATED("Created"),
     IN_TRANSIT("In transit"),
@@ -10,9 +13,5 @@ public enum PackageStatus {
 
     PackageStatus(String label) {
         this.label = label;
-    }
-
-    public String getLabel() {
-        return label;
     }
 }
