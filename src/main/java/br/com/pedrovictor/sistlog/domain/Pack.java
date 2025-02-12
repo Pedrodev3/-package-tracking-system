@@ -57,6 +57,9 @@ public class Pack {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    @Column(name = "delivered_at")
+    private LocalDateTime deliveredAt;
+
      @OneToMany(mappedBy = "pkg", cascade = CascadeType.ALL, orphanRemoval = true)
      private List<TrackingEvent> trackingEvents;
 }
