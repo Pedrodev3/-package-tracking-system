@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -17,7 +18,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Package {
+public class Pack {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,15 +27,18 @@ public class Package {
     @Column(name = "description", nullable = false)
     private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "client_id", nullable = false)
-    @NotNull(message = "Client cannot be null")
-    private Client client;
+    @Column(name = "fun_fact", length = 500, nullable = false)
+    private String funFact;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_id", nullable = false)
     @NotNull(message = "Sender cannot be null")
     private Sender sender;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "client_id", nullable = false)
+    @NotNull(message = "Client cannot be null")
+    private Client recipient;
 
      @Enumerated(EnumType.STRING)
      private PackageStatus status;
@@ -42,8 +46,8 @@ public class Package {
     @Column(name = "is_holiday", nullable = false)
     private Boolean isHoliday;
 
-    @Column(name = "fun_fact", length = 500, nullable = false)
-    private String funFact;
+    @Column(name = "estimated_delivery_date", nullable = false)
+    private LocalDate estimatedDeliveryDate;
 
     @Column(name = "created_at", updatable = false)
     @CreationTimestamp
