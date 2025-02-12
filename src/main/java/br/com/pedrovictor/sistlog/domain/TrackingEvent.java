@@ -25,7 +25,7 @@ public class TrackingEvent {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "package_id", nullable = false)
     @NotNull(message = "Package cannot be null")
-    private Package pkg;
+    private Pack pkg;
 
     @Column(name = "event_location", length = 300, nullable = false)
     private String eventLocation;

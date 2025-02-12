@@ -41,7 +41,7 @@ public class Pack {
     private Client recipient;
 
      @Enumerated(EnumType.STRING)
-     private PackageStatus status;
+     private PackStatus status;
 
     @Column(name = "is_holiday", nullable = false)
     private Boolean isHoliday;

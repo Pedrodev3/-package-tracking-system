@@ -3,7 +3,7 @@ package br.com.pedrovictor.sistlog.domain;
 import lombok.Getter;
 
 @Getter
-public enum PackageStatus {
+public enum PackStatus {
     CREATED("Created"),
     IN_TRANSIT("In transit"),
     DELIVERED("Delivered"),
@@ -11,7 +11,7 @@ public enum PackageStatus {
 
     private final String label;
 
-    PackageStatus(String label) {
+    PackStatus(String label) {
         this.label = label;
     }
 }
