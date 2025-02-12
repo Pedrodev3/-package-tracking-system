@@ -6,6 +6,9 @@ import br.com.pedrovictor.sistlog.domain.PackStatus;
 import br.com.pedrovictor.sistlog.domain.Sender;
 import br.com.pedrovictor.sistlog.dto.PackDTOs.PackCreateRequestDTO;
 import br.com.pedrovictor.sistlog.dto.PackDTOs.PackCreateResponseDTO;
+import br.com.pedrovictor.sistlog.dto.PackDTOs.PackUpdateStatusRequestDTO;
+import br.com.pedrovictor.sistlog.dto.PackDTOs.PackUpdateStatusResponseDTO;
+import br.com.pedrovictor.sistlog.exception.InvalidStatusException;
 import br.com.pedrovictor.sistlog.external.facade.ExternalApisFacade;
 import br.com.pedrovictor.sistlog.repository.ClientRepository;
 import br.com.pedrovictor.sistlog.repository.PackRepository;
@@ -14,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
 
 @Service
@@ -68,6 +72,55 @@ public class PackService {
             );
         } catch (Exception e) {
             throw new RuntimeException("Error creating package", e);
+        }
+    }
+
+    public PackUpdateStatusResponseDTO updatePackageStatusById(Long id, PackUpdateStatusRequestDTO packUpdateStatus) {
+        try {
+            Pack pack = packRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Package not found"));
+
+            PackStatus newStatus = PackStatus.valueOf(packUpdateStatus.getStatus());
+
+            validateStatusUpdate(pack, newStatus);
+
+            pack.setStatus(PackStatus.valueOf(newStatus.name()));
+            if(pack.getStatus().name().equals("DELIVERED")) {
+                pack.setDeliveredAt(LocalDateTime.now());
+            }
+            packRepository.save(pack);
+
+            return new PackUpdateStatusResponseDTO(
+                    pack.getId(),
+                    pack.getDescription(),
+                    pack.getSender().getSender(),
+                    pack.getRecipient().getRecipient(),
+                    pack.getStatus().name(),
+                    pack.getCreatedAt(),
+                    pack.getUpdatedAt(),
+                    pack.getDeliveredAt()
+            );
+        } catch (Exception e) {
+            throw new RuntimeException("Error updating package status", e);
+        }
+    }
+
+    private void validateStatusUpdate(Pack pack, PackStatus newStatus) {
+        PackStatus oldStatus = pack.getStatus();
+        if (oldStatus == PackStatus.DELIVERED) {
+            throw new InvalidStatusException(
+                    String.format("The package has already been %s".formatted(oldStatus))
+            );
+        }
+        if (oldStatus == newStatus) {
+            throw new InvalidStatusException(
+                    String.format("The status is already %s".formatted(newStatus))
+            );
+        }
+        if(!oldStatus.canUpdateTO(newStatus)) {
+            throw new InvalidStatusException(
+                    String.format("Transition from %s to %s is not allowed".formatted(oldStatus, newStatus))
+            );
         }
     }
 
