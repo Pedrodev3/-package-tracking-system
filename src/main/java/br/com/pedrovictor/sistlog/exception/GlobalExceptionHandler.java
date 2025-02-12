@@ -17,4 +17,11 @@ public class GlobalExceptionHandler {
         ex.getBindingResult().getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
         return ResponseEntity.badRequest().body(errors);
     }
+
+    @ExceptionHandler(InvalidStatusException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidStatusException(InvalidStatusException ex) {
+        Map<String, String> errors = new HashMap<>();
+        errors.put("Warning: ", ex.getMessage());
+        return ResponseEntity.badRequest().body(errors);
+    }
 }
