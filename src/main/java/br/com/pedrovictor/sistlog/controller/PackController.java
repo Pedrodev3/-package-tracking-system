@@ -1,6 +1,7 @@
 package br.com.pedrovictor.sistlog.controller;
 
-import br.com.pedrovictor.sistlog.dto.PackCreateDTO;
+import br.com.pedrovictor.sistlog.dto.PackDTOs.PackCreateRequestDTO;
+import br.com.pedrovictor.sistlog.dto.PackDTOs.PackCreateResponseDTO;
 import br.com.pedrovictor.sistlog.service.PackService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,11 +18,12 @@ public class PackController {
 
     private static final Logger logger = LoggerFactory.getLogger(PackController.class);
 
-    private final PackService packageService;
+    private final PackService packService;
 
     @PostMapping(value = "/create-package", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<PackCreateDTO> createPackage(@Valid @RequestBody PackCreateDTO body) {
-        PackCreateDTO createdPackage = packageService.createPackage(body);
+    public ResponseEntity<PackCreateResponseDTO> createPackage(@Valid @RequestBody PackCreateRequestDTO body) {
+        logger.info("Recebendo requisição para criar um pacote: {}", body);
+        PackCreateResponseDTO createdPackage = packService.createPackage(body);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(createdPackage);
     }

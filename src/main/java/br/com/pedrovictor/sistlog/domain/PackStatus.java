@@ -4,10 +4,10 @@ import lombok.Getter;
 
 @Getter
 public enum PackStatus {
-    CREATED("Created"),
-    IN_TRANSIT("In transit"),
-    DELIVERED("Delivered"),
-    CANCELLED("Cancelled");
+    CREATED("CREATED"),
+    IN_TRANSIT("IN TRANSIT"),
+    DELIVERED("DELIVERED"),
+    CANCELLED("CANCELLED");
 
     private final String label;
 
