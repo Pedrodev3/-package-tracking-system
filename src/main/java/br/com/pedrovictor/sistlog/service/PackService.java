@@ -1,19 +1,16 @@
 package br.com.pedrovictor.sistlog.service;
 
 import br.com.pedrovictor.sistlog.domain.*;
-import br.com.pedrovictor.sistlog.dto.PackDTOs.PackCreateRequestDTO;
-import br.com.pedrovictor.sistlog.dto.PackDTOs.PackCreateResponseDTO;
+import br.com.pedrovictor.sistlog.dto.PackDTOs.*;
 import br.com.pedrovictor.sistlog.dto.PackDTOs.PackDetails.EventDTO;
 import br.com.pedrovictor.sistlog.dto.PackDTOs.PackDetails.PackDetailsResponseDTO;
-import br.com.pedrovictor.sistlog.dto.PackDTOs.PackUpdateStatusRequestDTO;
-import br.com.pedrovictor.sistlog.dto.PackDTOs.PackUpdateStatusResponseDTO;
-import br.com.pedrovictor.sistlog.exception.InvalidStatusException;
+import br.com.pedrovictor.sistlog.exception.BadRequestException;
+import br.com.pedrovictor.sistlog.exception.NotFoundException;
 import br.com.pedrovictor.sistlog.external.facade.ExternalApisFacade;
 import br.com.pedrovictor.sistlog.repository.ClientRepository;
 import br.com.pedrovictor.sistlog.repository.PackRepository;
 import br.com.pedrovictor.sistlog.repository.SenderRepository;
 import br.com.pedrovictor.sistlog.repository.TrackingEventRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -82,15 +79,15 @@ public class PackService {
     public PackUpdateStatusResponseDTO updatePackageStatusById(Long id, PackUpdateStatusRequestDTO packUpdateStatus) {
         try {
             Pack pack = packRepository.findByIdWithDetails(id)
-                    .orElseThrow(() -> new EntityNotFoundException("Package not found"));
+                    .orElseThrow(() -> new NotFoundException("Pacote não foi encontrado"));
 
-            PackStatus newStatus = PackStatus.valueOf(packUpdateStatus.getStatus());
+            PackStatus newStatus = PackStatus.fromLabel(packUpdateStatus.getStatus());
             validateStatusUpdate(pack, newStatus);
 
             if(!pack.getStatus().equals(newStatus)) {
                 pack.setStatus(newStatus);
 
-                if(newStatus.getLabel().equals("DELIVERED")) {
+                if(newStatus == PackStatus.DELIVERED) {
                     pack.setDeliveredAt(LocalDateTime.now());
                 }
 
@@ -119,9 +116,9 @@ public class PackService {
         try {
             Pack pack = includeEvents
                     ? packRepository.findByIdWithEvents(id)
-                    .orElseThrow(() -> new RuntimeException("Package not found"))
+                    .orElseThrow(() -> new NotFoundException("Pacote não foi encontrado"))
                     : packRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Package not found"));
+                    .orElseThrow(() -> new NotFoundException("Pacote não foi encontrado"));
 
             return new PackDetailsResponseDTO(
                     pack.getId(),
@@ -158,6 +155,27 @@ public class PackService {
         }
     }
 
+    public PackCancelledResponseDTO cancelPackageById(Long id) {
+        try {
+            Pack pack = packRepository.findById(id)
+                    .orElseThrow(() -> new NotFoundException("Pacote não foi encontrado"));
+
+            PackStatus newStatus = PackStatus.CANCELLED;
+            validateStatusUpdate(pack, newStatus);
+
+            pack.setStatus(newStatus);
+            packRepository.save(pack);
+
+            return new PackCancelledResponseDTO(
+                    pack.getId(),
+                    pack.getStatus().name(),
+                    pack.getUpdatedAt()
+            );
+        } catch (Exception e) {
+            throw new RuntimeException("Error deleting package", e);
+        }
+    }
+
     private CompletableFuture<Boolean> getHolidayFuture(LocalDate estimatedDeliveryDate) {
         return externalApisFacade.isHolidayAsync(LocalDate.now().getYear(), "BR", estimatedDeliveryDate);
     }
@@ -168,18 +186,23 @@ public class PackService {
     private void validateStatusUpdate(Pack pack, PackStatus newStatus) {
         PackStatus oldStatus = pack.getStatus();
         if (oldStatus == PackStatus.DELIVERED) {
-            throw new InvalidStatusException(
-                    String.format("The package has already been %s".formatted(oldStatus))
+            throw new BadRequestException(
+                    "O pacote já foi entregue e não pode ser cancelado."
+            );
+        }
+        if(oldStatus == PackStatus.CANCELLED) {
+            throw new BadRequestException(
+                    "O pacote já foi cancelado."
             );
         }
         if (oldStatus == newStatus) {
-            throw new InvalidStatusException(
-                    String.format("The status is already %s".formatted(newStatus))
+            throw new BadRequestException(
+                    String.format("O status já é %s".formatted(newStatus.getLabelPtBr()))
             );
         }
         if(!oldStatus.canUpdateTO(newStatus)) {
-            throw new InvalidStatusException(
-                    String.format("Transition from %s to %s is not allowed".formatted(oldStatus, newStatus))
+            throw new BadRequestException(
+                    String.format("Não é permitido alteração de status de %s para %s".formatted(oldStatus.getLabelPtBr(), newStatus.getLabelPtBr()))
             );
         }
     }
