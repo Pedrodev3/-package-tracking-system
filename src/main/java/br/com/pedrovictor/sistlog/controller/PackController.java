@@ -14,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/packages")
 @RequiredArgsConstructor
@@ -49,4 +51,16 @@ public class PackController {
         return ResponseEntity.status(HttpStatus.OK).body(packageDetails);
     }
 
+    @GetMapping(value = "/consult-packages", produces = "application/json")
+    public ResponseEntity<List<PackDetailsResponseDTO>> getPackages(
+            @RequestParam(required = false) List<String> recipients,
+            @RequestParam(required = false) List<String> senders) {
+        logger.info("Receiving request to get the packages of the recipient: {} and sender: {}", recipients, senders);
+        List<PackDetailsResponseDTO> packages = packService.getPackagesByRecipientsAndOrSenders(recipients, senders);
+
+        if (packages.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(packages);
+    }
 }
