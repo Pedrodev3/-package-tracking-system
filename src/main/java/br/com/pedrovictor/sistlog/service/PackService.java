@@ -138,6 +138,26 @@ public class PackService {
         }
     }
 
+    public List<PackDetailsResponseDTO> getPackagesByRecipientsAndOrSenders(List<String> recipients, List<String> senders) {
+        try {
+            List<Pack> packs = packRepository.findByRecipientsAndOrSenders(recipients, senders);
+            return packs.stream()
+                    .map(pack -> new PackDetailsResponseDTO(
+                            pack.getId(),
+                            pack.getDescription(),
+                            pack.getSender().getSender(),
+                            pack.getRecipient().getRecipient(),
+                            pack.getStatus().name(),
+                            pack.getCreatedAt(),
+                            pack.getUpdatedAt(),
+                            null
+                    ))
+                    .toList();
+        } catch (Exception e) {
+            throw new RuntimeException("Error getting packages", e);
+        }
+    }
+
     private CompletableFuture<Boolean> getHolidayFuture(LocalDate estimatedDeliveryDate) {
         return externalApisFacade.isHolidayAsync(LocalDate.now().getYear(), "BR", estimatedDeliveryDate);
     }
