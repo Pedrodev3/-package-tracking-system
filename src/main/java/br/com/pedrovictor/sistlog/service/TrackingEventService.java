@@ -54,7 +54,7 @@ public class TrackingEventService {
         } catch (Exception e) {
             throw new RuntimeException("Error sending tracking event for package " + pack, e);
         }
-        CompletableFuture.completedFuture(null);
+//        CompletableFuture.completedFuture(null);
     }
 
     @Recover
