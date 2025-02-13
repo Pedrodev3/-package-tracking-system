@@ -1,10 +1,7 @@
 package br.com.pedrovictor.sistlog.controller;
 
-import br.com.pedrovictor.sistlog.dto.PackDTOs.PackCreateRequestDTO;
-import br.com.pedrovictor.sistlog.dto.PackDTOs.PackCreateResponseDTO;
+import br.com.pedrovictor.sistlog.dto.PackDTOs.*;
 import br.com.pedrovictor.sistlog.dto.PackDTOs.PackDetails.PackDetailsResponseDTO;
-import br.com.pedrovictor.sistlog.dto.PackDTOs.PackUpdateStatusRequestDTO;
-import br.com.pedrovictor.sistlog.dto.PackDTOs.PackUpdateStatusResponseDTO;
 import br.com.pedrovictor.sistlog.service.PackService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -62,5 +59,13 @@ public class PackController {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         }
         return ResponseEntity.status(HttpStatus.OK).body(packages);
+    }
+
+    @PatchMapping(value = "/{id}/cancel-package", produces = "application/json")
+    public  ResponseEntity<PackCancelledResponseDTO> cancelPackage(@PathVariable Long id) {
+        logger.info("Receiving request to cancel the package with ID: {}", id);
+        PackCancelledResponseDTO cancelledPackage = packService.cancelPackageById(id);
+
+        return ResponseEntity.status(HttpStatus.OK).body(cancelledPackage);
     }
 }
