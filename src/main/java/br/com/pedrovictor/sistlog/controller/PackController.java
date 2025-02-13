@@ -2,6 +2,7 @@ package br.com.pedrovictor.sistlog.controller;
 
 import br.com.pedrovictor.sistlog.dto.PackDTOs.PackCreateRequestDTO;
 import br.com.pedrovictor.sistlog.dto.PackDTOs.PackCreateResponseDTO;
+import br.com.pedrovictor.sistlog.dto.PackDTOs.PackDetails.PackDetailsResponseDTO;
 import br.com.pedrovictor.sistlog.dto.PackDTOs.PackUpdateStatusRequestDTO;
 import br.com.pedrovictor.sistlog.dto.PackDTOs.PackUpdateStatusResponseDTO;
 import br.com.pedrovictor.sistlog.service.PackService;
@@ -35,7 +36,17 @@ public class PackController {
         logger.info("Receiving request to update the status of the package with ID: {}", id);
         PackUpdateStatusResponseDTO updatedPackage = packService.updatePackageStatusById(id, body);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(updatedPackage);
+        return ResponseEntity.status(HttpStatus.OK).body(updatedPackage);
+    }
+
+    @GetMapping(value = "/{id}/consult-package", produces = "application/json")
+    public ResponseEntity<PackDetailsResponseDTO> getPackageDetails(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "false") boolean includeEvents) {
+        logger.info("Receiving request to get the details of the package with ID: {}", id);
+        PackDetailsResponseDTO packageDetails = packService.getPackageDetailsById(id, includeEvents);
+
+        return ResponseEntity.status(HttpStatus.OK).body(packageDetails);
     }
 
 }
