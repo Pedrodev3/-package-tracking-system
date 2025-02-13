@@ -60,6 +60,6 @@ public class Pack {
     @Column(name = "delivered_at")
     private LocalDateTime deliveredAt;
 
-     @OneToMany(mappedBy = "pkg", cascade = CascadeType.ALL, orphanRemoval = true)
-     private List<TrackingEvent> trackingEvents;
+     @OneToMany(mappedBy = "pkg", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+     private List<TrackingEvent> events;
 }
