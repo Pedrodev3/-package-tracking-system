@@ -1,11 +1,10 @@
 package br.com.pedrovictor.sistlog.service;
 
-import br.com.pedrovictor.sistlog.domain.Client;
-import br.com.pedrovictor.sistlog.domain.Pack;
-import br.com.pedrovictor.sistlog.domain.PackStatus;
-import br.com.pedrovictor.sistlog.domain.Sender;
+import br.com.pedrovictor.sistlog.domain.*;
 import br.com.pedrovictor.sistlog.dto.PackDTOs.PackCreateRequestDTO;
 import br.com.pedrovictor.sistlog.dto.PackDTOs.PackCreateResponseDTO;
+import br.com.pedrovictor.sistlog.dto.PackDTOs.PackDetails.EventDTO;
+import br.com.pedrovictor.sistlog.dto.PackDTOs.PackDetails.PackDetailsResponseDTO;
 import br.com.pedrovictor.sistlog.dto.PackDTOs.PackUpdateStatusRequestDTO;
 import br.com.pedrovictor.sistlog.dto.PackDTOs.PackUpdateStatusResponseDTO;
 import br.com.pedrovictor.sistlog.exception.InvalidStatusException;
@@ -13,11 +12,14 @@ import br.com.pedrovictor.sistlog.external.facade.ExternalApisFacade;
 import br.com.pedrovictor.sistlog.repository.ClientRepository;
 import br.com.pedrovictor.sistlog.repository.PackRepository;
 import br.com.pedrovictor.sistlog.repository.SenderRepository;
+import br.com.pedrovictor.sistlog.repository.TrackingEventRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @Service
@@ -28,6 +30,8 @@ public class PackService {
     private final PackRepository packRepository;
     private final ClientRepository clientRepository;
     private final SenderRepository senderRepository;
+    private final TrackingEventRepository trackingEventRepository;
+    private final TrackingEventService trackingEventService;
 
     public PackCreateResponseDTO createPackage(PackCreateRequestDTO body) {
         try {
@@ -77,18 +81,24 @@ public class PackService {
 
     public PackUpdateStatusResponseDTO updatePackageStatusById(Long id, PackUpdateStatusRequestDTO packUpdateStatus) {
         try {
-            Pack pack = packRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Package not found"));
+            Pack pack = packRepository.findByIdWithDetails(id)
+                    .orElseThrow(() -> new EntityNotFoundException("Package not found"));
 
             PackStatus newStatus = PackStatus.valueOf(packUpdateStatus.getStatus());
-
             validateStatusUpdate(pack, newStatus);
 
-            pack.setStatus(PackStatus.valueOf(newStatus.name()));
-            if(pack.getStatus().name().equals("DELIVERED")) {
-                pack.setDeliveredAt(LocalDateTime.now());
+            if(!pack.getStatus().equals(newStatus)) {
+                pack.setStatus(newStatus);
+
+                if(newStatus.getLabel().equals("DELIVERED")) {
+                    pack.setDeliveredAt(LocalDateTime.now());
+                }
+
+                packRepository.save(pack);
             }
-            packRepository.save(pack);
+
+            /* Send tracking event */
+            this.trackingEventService.sendTrackingEvent(pack, newStatus);
 
             return new PackUpdateStatusResponseDTO(
                     pack.getId(),
@@ -103,6 +113,36 @@ public class PackService {
         } catch (Exception e) {
             throw new RuntimeException("Error updating package status", e);
         }
+    }
+
+    public PackDetailsResponseDTO getPackageDetailsById(Long id, Boolean includeEvents) {
+        try {
+            Pack pack = includeEvents
+                    ? packRepository.findByIdWithEvents(id)
+                    .orElseThrow(() -> new RuntimeException("Package not found"))
+                    : packRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Package not found"));
+
+            return new PackDetailsResponseDTO(
+                    pack.getId(),
+                    pack.getDescription(),
+                    pack.getSender().getSender(),
+                    pack.getRecipient().getRecipient(),
+                    pack.getStatus().name(),
+                    pack.getCreatedAt(),
+                    pack.getUpdatedAt(),
+                    includeEvents ? getPackEvents(pack) : null
+            );
+        } catch (Exception e) {
+            throw new RuntimeException("Error getting package details", e);
+        }
+    }
+
+    private CompletableFuture<Boolean> getHolidayFuture(LocalDate estimatedDeliveryDate) {
+        return externalApisFacade.isHolidayAsync(LocalDate.now().getYear(), "BR", estimatedDeliveryDate);
+    }
+    private CompletableFuture<String> getFunFactFuture() {
+        return externalApisFacade.getRandomFunFactAsync();
     }
 
     private void validateStatusUpdate(Pack pack, PackStatus newStatus) {
@@ -124,10 +164,15 @@ public class PackService {
         }
     }
 
-    private CompletableFuture<Boolean> getHolidayFuture(LocalDate estimatedDeliveryDate) {
-        return externalApisFacade.isHolidayAsync(LocalDate.now().getYear(), "BR", estimatedDeliveryDate);
-    }
-    private CompletableFuture<String> getFunFactFuture() {
-        return externalApisFacade.getRandomFunFactAsync();
+    private List<EventDTO> getPackEvents(Pack pack) {
+        List<TrackingEvent> trackingEvents = trackingEventRepository.findByPkg(pack);
+        return trackingEvents.stream()
+                .map(trackingEvent -> new EventDTO(
+                        trackingEvent.getPkg().getId(),
+                        trackingEvent.getEventLocation(),
+                        trackingEvent.getEventDescription(),
+                        trackingEvent.getEventTimestamp()
+                ))
+                .toList();
     }
 }
