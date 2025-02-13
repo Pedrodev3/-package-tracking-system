@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Event {
+public class EventDTO {
     private Long pacoteId;
     private String localizacao;
     private String descricao;
