@@ -16,13 +16,13 @@ import java.util.List;
 @RestController
 @RequestMapping("/packages")
 @RequiredArgsConstructor
-public class PackController {
+public class PackController implements SwaggerPackController {
 
     private static final Logger logger = LoggerFactory.getLogger(PackController.class);
 
     private final PackService packService;
 
-    @PostMapping(value = "/create-package", consumes = "application/json", produces = "application/json")
+    @Override
     public ResponseEntity<PackCreateResponseDTO> createPackage(@Valid @RequestBody PackCreateRequestDTO body) {
         logger.info("Receiving request to create a package: {}", body);
         PackCreateResponseDTO createdPackage = packService.createPackage(body);
@@ -30,15 +30,17 @@ public class PackController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdPackage);
     }
 
-    @PatchMapping(value = "/{id}/update-status", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<PackUpdateStatusResponseDTO> updatePackageStatus(@PathVariable Long id, @Valid @RequestBody PackUpdateStatusRequestDTO body) {
+    @Override
+    public ResponseEntity<PackUpdateStatusResponseDTO> updatePackageStatus(
+            @PathVariable Long id,
+            @Valid @RequestBody PackUpdateStatusRequestDTO body) {
         logger.info("Receiving request to update the status of the package with ID: {}", id);
         PackUpdateStatusResponseDTO updatedPackage = packService.updatePackageStatusById(id, body);
 
         return ResponseEntity.status(HttpStatus.OK).body(updatedPackage);
     }
 
-    @GetMapping(value = "/{id}/consult-package", produces = "application/json")
+    @Override
     public ResponseEntity<PackDetailsResponseDTO> getPackageDetails(
             @PathVariable Long id,
             @RequestParam(defaultValue = "false") boolean includeEvents) {
@@ -48,7 +50,7 @@ public class PackController {
         return ResponseEntity.status(HttpStatus.OK).body(packageDetails);
     }
 
-    @GetMapping(value = "/consult-packages", produces = "application/json")
+    @Override
     public ResponseEntity<List<PackDetailsResponseDTO>> getPackages(
             @RequestParam(required = false) List<String> recipients,
             @RequestParam(required = false) List<String> senders) {
@@ -61,7 +63,7 @@ public class PackController {
         return ResponseEntity.status(HttpStatus.OK).body(packages);
     }
 
-    @PatchMapping(value = "/{id}/cancel-package", produces = "application/json")
+    @Override
     public  ResponseEntity<PackCancelledResponseDTO> cancelPackage(@PathVariable Long id) {
         logger.info("Receiving request to cancel the package with ID: {}", id);
         PackCancelledResponseDTO cancelledPackage = packService.cancelPackageById(id);
