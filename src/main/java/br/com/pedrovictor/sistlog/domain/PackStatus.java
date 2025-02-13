@@ -9,7 +9,7 @@ import java.util.Arrays;
 @Getter
 public enum PackStatus {
     CREATED("CREATED", "criado"),
-    IN_TRANSIT("IN TRANSIT", "em trânsito"),
+    IN_TRANSIT("IN_TRANSIT", "em trânsito"),
     DELIVERED("DELIVERED", "entregue"),
     CANCELLED("CANCELLED", "cancelado");
 
