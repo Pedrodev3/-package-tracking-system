@@ -24,4 +24,11 @@ public class GlobalExceptionHandler {
         errors.put("Warning: ", ex.getMessage());
         return ResponseEntity.badRequest().body(errors);
     }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<Map<String, String>> handleBadRequestException(BadRequestException ex) {
+        Map<String, String> errors = new HashMap<>();
+        errors.put("error: ", ex.getMessage());
+        return ResponseEntity.badRequest().body(errors);
+    }
 }
