@@ -4,18 +4,14 @@ import br.com.pedrovictor.sistlog.domain.Pack;
 import br.com.pedrovictor.sistlog.domain.PackStatus;
 import br.com.pedrovictor.sistlog.domain.TrackingEvent;
 import br.com.pedrovictor.sistlog.domain.TrackingEventLocationType;
-import br.com.pedrovictor.sistlog.repository.TrackingEventRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
@@ -24,10 +20,9 @@ import java.util.concurrent.CompletableFuture;
 @RequiredArgsConstructor
 public class TrackingEventService {
     private static final Logger logger = LoggerFactory.getLogger(TrackingEventService.class);
-    private final TrackingEventRepository trackingEventRepository;
     private final TrackingEventPersistenceService trackingEventPersistenceService;
 
-    @Async("trackingEventExecutor")
+    @Async
     @Retryable(retryFor = Exception.class, maxAttempts = 3, backoff = @Backoff(delay = 2000))
     public void sendTrackingEvent(Pack pack, PackStatus newStatus) {
         try {
