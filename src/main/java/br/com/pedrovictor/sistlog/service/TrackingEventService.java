@@ -25,13 +25,7 @@ import java.util.concurrent.CompletableFuture;
 public class TrackingEventService {
     private static final Logger logger = LoggerFactory.getLogger(TrackingEventService.class);
     private final TrackingEventRepository trackingEventRepository;
-    @Lazy
-    private final ApplicationContext applicationContext;
-
-    @Transactional
-    public void saveTrackingEvent(TrackingEvent trackingEvent) {
-        trackingEventRepository.save(trackingEvent);
-    }
+    private final TrackingEventPersistenceService trackingEventPersistenceService;
 
     @Async("trackingEventExecutor")
     @Retryable(retryFor = Exception.class, maxAttempts = 3, backoff = @Backoff(delay = 2000))
@@ -47,14 +41,12 @@ public class TrackingEventService {
             trackingEvent.setEventDescription(locationType.getDescription());
             trackingEvent.setEventTimestamp(LocalDateTime.now());
 
-            TrackingEventService trackingEventServiceProxy = applicationContext.getBean(TrackingEventService.class);
-            trackingEventServiceProxy.saveTrackingEvent(trackingEvent);
+            trackingEventPersistenceService.saveTrackingEvent(trackingEvent);
 
             logger.info("Tracking event saved for package ID: {}", pack.getId());
         } catch (Exception e) {
             throw new RuntimeException("Error sending tracking event for package " + pack, e);
         }
-//        CompletableFuture.completedFuture(null);
     }
 
     @Recover
