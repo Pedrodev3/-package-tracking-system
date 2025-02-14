@@ -5,7 +5,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
 
-@FeignClient(name= "dog-api", url = "https://dogapi.dog")
+@FeignClient(name= "dog-api", url = "https://dogapi.dog", configuration = FeignRetryConfig.class)
 public interface DogApiClient {
     @GetMapping("/api/v2/facts")
     FunFactDTO getFunFact();

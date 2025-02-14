@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface SenderRepository extends JpaRepository<Sender, Long> {
     Optional<Sender> findSenderById(Long id);
     Optional<Sender> findBySender(String sender);
+    Optional<Sender> findFirstBySender(String sender);
 }

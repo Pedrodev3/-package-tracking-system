@@ -28,12 +28,15 @@ public class ExternalApisFacade {
         return CompletableFuture.supplyAsync(() -> nagerClient.getHolidays(year, countryCode).stream().anyMatch(holiday -> holiday.getDate().equals(dateInString)));
     }
 
-    // Preciso refatorar para remover quantidade de DTOs desnecessários
     @Async
     public CompletableFuture<String> getRandomFunFactAsync() {
         return CompletableFuture.supplyAsync(() -> {
-            FunFactDTO funFact = dogApiClient.getFunFact();
-            return funFact.getData().getFirst().getAttributes().getBody();
+            try {
+                FunFactDTO funFact = dogApiClient.getFunFact();
+                return funFact.getData().getFirst().getAttributes().getBody();
+            } catch (Exception e) {
+                return "Fun fact: Dogs are amazing!";
+            }
         });
     }
 }

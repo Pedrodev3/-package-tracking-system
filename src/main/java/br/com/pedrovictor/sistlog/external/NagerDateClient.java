@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import java.net.http.HttpResponse;
 import java.util.List;
 
-@FeignClient(name = "nager-date", url = "https://date.nager.at")
+@FeignClient(name = "nager-date", url = "https://date.nager.at", configuration = FeignRetryConfig.class)
 public interface NagerDateClient {
     @GetMapping("/api/v3/PublicHolidays/{year}/{countryCode}")
     List<HolidayDTO> getHolidays(@PathVariable int year, @PathVariable String countryCode);

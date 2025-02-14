@@ -13,6 +13,7 @@ import br.com.pedrovictor.sistlog.repository.SenderRepository;
 import br.com.pedrovictor.sistlog.repository.TrackingEventRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -30,15 +31,16 @@ public class PackService {
     private final TrackingEventRepository trackingEventRepository;
     private final TrackingEventService trackingEventService;
 
+    @Transactional
     public PackCreateResponseDTO createPackage(PackCreateRequestDTO body) {
         try {
-            Sender sender = senderRepository.findBySender(body.getSender())
+            Sender sender = senderRepository.findFirstBySender(body.getSender())
                     .orElseGet(() -> {
                         Sender newSender = new Sender();
                         newSender.setSender(body.getSender());
                         return senderRepository.save(newSender);
                     });
-            Client recipient = clientRepository.findByRecipient(body.getRecipient())
+            Client recipient = clientRepository.findFirstByRecipient(body.getRecipient())
                     .orElseGet(() -> {
                         Client newClient = new Client();
                         newClient.setRecipient(body.getRecipient());
@@ -76,6 +78,7 @@ public class PackService {
         }
     }
 
+    @Transactional
     public PackUpdateStatusResponseDTO updatePackageStatusById(Long id, PackUpdateStatusRequestDTO packUpdateStatus) {
         try {
             Pack pack = packRepository.findByIdWithDetails(id)
@@ -155,6 +158,7 @@ public class PackService {
         }
     }
 
+    @Transactional
     public PackCancelledResponseDTO cancelPackageById(Long id) {
         try {
             Pack pack = packRepository.findById(id)

@@ -47,7 +47,9 @@ public class PackController implements SwaggerPackController {
         logger.info("Receiving request to get the details of the package with ID: {}", id);
         PackDetailsResponseDTO packageDetails = packService.getPackageDetailsById(id, includeEvents);
 
-        return ResponseEntity.status(HttpStatus.OK).body(packageDetails);
+        return ResponseEntity.status(HttpStatus.OK)
+                .header("Cache-Control", "public, max-age=600")
+                .body(packageDetails);
     }
 
     @Override
@@ -60,7 +62,9 @@ public class PackController implements SwaggerPackController {
         if (packages.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         }
-        return ResponseEntity.status(HttpStatus.OK).body(packages);
+        return ResponseEntity.status(HttpStatus.OK)
+                .header("Cache-Control", "public, max-age=300")
+                .body(packages);
     }
 
     @Override

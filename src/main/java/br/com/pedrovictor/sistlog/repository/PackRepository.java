@@ -2,6 +2,7 @@ package br.com.pedrovictor.sistlog.repository;
 
 import br.com.pedrovictor.sistlog.domain.Pack;
 import br.com.pedrovictor.sistlog.domain.PackStatus;
+import br.com.pedrovictor.sistlog.domain.Sender;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
