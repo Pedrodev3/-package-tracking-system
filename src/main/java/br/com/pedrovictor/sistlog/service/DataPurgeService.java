@@ -28,7 +28,7 @@ public class DataPurgeService {
         logger.info("Purging packages with status CANCELLED and updated before {}", oneYearAgo);
 
         do {
-            packageIds = packRepository.findOldCancelledPackageIds(PackStatus.CANCELLED, oneYearAgo);
+            packageIds = packRepository.findOldCancelledPackageIds(PackStatus.CANCELLED, oneYearAgo, BATCH_SIZE);
             if (!packageIds.isEmpty()) {
                 packRepository.deleteBatchByIds(packageIds);
                 logger.info("Deleted {} old cancelled packages", packageIds.size());

@@ -36,8 +36,8 @@ public interface PackRepository extends JpaRepository<Pack, Long> {
             "AND  (:senders IS NULL OR p.sender.sender IN :senders)")
     List<Pack> findByRecipientsAndOrSenders(List<String> recipients, List<String> senders);
 
-    @Query("SELECT p.id FROM Pack p WHERE p.status = :status AND p.updatedAt < :dateTime")
-    List<Long> findOldCancelledPackageIds(PackStatus status, LocalDateTime dateTime);
+    @Query("SELECT p.id FROM Pack p WHERE p.status = :status AND p.updatedAt < :dateTime ORDER BY p.id ASC LIMIT :batchSize")
+    List<Long> findOldCancelledPackageIds(PackStatus status, LocalDateTime dateTime, @Param("batchSize") int batchSize);
 
     @Modifying
     @Transactional
