@@ -72,9 +72,9 @@
 ## 🛑 Como parar a execução do projeto?
 ### Execute o comando:
 - `docker-compose down` na pasta raiz do projeto para remover o container criado.
-</br>
-<strong>OU</strong>
-</br>
+
+OU
+
 - `docker-compose down -v` para remover os volumes também além do próprio container.
 
 ---
