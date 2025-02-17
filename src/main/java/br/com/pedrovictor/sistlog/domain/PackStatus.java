@@ -36,9 +36,9 @@ public enum PackStatus {
                                 ". Allowed values: " + Arrays.toString(PackStatus.values())));
     }
 
-    public boolean canUpdateTO(PackStatus newStatus) {
+    public boolean canUpdateTo(PackStatus newStatus) {
         return switch (this) {
-            case CREATED -> newStatus == IN_TRANSIT || newStatus == CANCELLED;
+            case CREATED -> newStatus == IN_TRANSIT;
             case IN_TRANSIT -> newStatus == DELIVERED;
             case DELIVERED -> false;
             case CANCELLED -> false;

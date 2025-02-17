@@ -165,7 +165,7 @@ public class PackService {
                     .orElseThrow(() -> new NotFoundException("Pacote não foi encontrado"));
 
             PackStatus newStatus = PackStatus.CANCELLED;
-            validateStatusUpdate(pack, newStatus);
+            validateStatusToCancel(pack, newStatus);
 
             pack.setStatus(newStatus);
             packRepository.save(pack);
@@ -189,11 +189,6 @@ public class PackService {
 
     private void validateStatusUpdate(Pack pack, PackStatus newStatus) {
         PackStatus oldStatus = pack.getStatus();
-        if (oldStatus == PackStatus.DELIVERED) {
-            throw new BadRequestException(
-                    "O pacote já foi entregue e não pode ser cancelado."
-            );
-        }
         if(oldStatus == PackStatus.CANCELLED) {
             throw new BadRequestException(
                     "O pacote já foi cancelado."
@@ -204,9 +199,33 @@ public class PackService {
                     String.format("O status já é %s".formatted(newStatus.getLabelPtBr()))
             );
         }
-        if(!oldStatus.canUpdateTO(newStatus)) {
+        if(!oldStatus.canUpdateTo(newStatus)) {
+            if (oldStatus == PackStatus.CREATED && newStatus == PackStatus.CANCELLED) {
+                throw new BadRequestException(
+                        String.format("Essa não é a requisição correta para realizar essa atualização (de %s para %s)".formatted(oldStatus.getLabelPtBr(), newStatus.getLabelPtBr()))
+                );
+            }
             throw new BadRequestException(
                     String.format("Não é permitido alteração de status de %s para %s".formatted(oldStatus.getLabelPtBr(), newStatus.getLabelPtBr()))
+            );
+        }
+    }
+
+    private void validateStatusToCancel(Pack pack, PackStatus newStatus) {
+        PackStatus oldStatus = pack.getStatus();
+        if (oldStatus == PackStatus.DELIVERED && newStatus == PackStatus.CANCELLED) {
+            throw new BadRequestException(
+                    "O pacote já foi entregue e não pode ser cancelado."
+            );
+        }
+        if(oldStatus == PackStatus.CANCELLED) {
+            throw new BadRequestException(
+                    "O pacote já foi cancelado."
+            );
+        }
+        if (oldStatus == PackStatus.IN_TRANSIT && newStatus == PackStatus.CANCELLED) {
+            throw new BadRequestException(
+                    "O pacote já está em trânsito e não pode ser cancelado."
             );
         }
     }
