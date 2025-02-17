@@ -59,8 +59,13 @@
 
 ---
 
-## 🔎 Visualização prévia da API no Swagger
+## 🔎 Visualização prévia da API e modelagem de dados
+
+### Swagger
 ![img.png](img.png)
+
+### Modelagem de Dados
+![img_1.png](img_1.png)
 
 ---
 
