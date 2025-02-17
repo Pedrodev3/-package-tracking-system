@@ -38,8 +38,29 @@
 ### ▶ Rodando o projeto
 1. Clone o repositório em uma IDE de sua escolha
 2. Acesse a pasta do projeto (raiz)
-3. Execute o comando `docker-compose up --build` para subir o container do MySQL e da aplicação
+3. Adicione na raiz do projeto (dentro de sist-log) dois arquivos que se chamam: .env e .env.docker. Obs.: Caso você não possua os arquivos que enviei separadamente, terá que criar ambos arquivos colocando praticamente a mesma informação em ambos:
+    ```
+    .env:
+     SPRING_APPLICATION_NAME=sist-log
+     SPRING_DATASOURCE_URL=jdbc:mysql://mysql_sist_log:3306/sist_log?useSSL=false&allowPublicKeyRetrieval=true
+     SPRING_DATASOURCE_USERNAME=root
+     SPRING_DATASOURCE_PASSWORD=senha (coloque a senha que desejar)
+   
+    .env.docker:
+      SPRING_APPLICATION_NAME=sist-log
+      SPRING_DATASOURCE_URL=jdbc:mysql://mysql_sist_log:3306/sist_log?useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME=root
+      SPRING_DATASOURCE_PASSWORD=senha (coloque a senha que desejar)
+   
+   Obs.: Lembre-se, cada uma dessas informações fica no seu próprio arquivo.
+    ```
+3. Após isso, execute o comando `docker-compose up --build` para subir o container do MySQL e da aplicação
 4. Acesse a URL `http://localhost:8080/swagger-ui.html` para acessar a documentação da API
+
+---
+
+## 🔎 Visualização prévia da API no Swagger
+![img.png](img.png)
 
 ---
 
