@@ -4,7 +4,7 @@ services:
     container_name: mysql_sist_log
     restart: always
     env_file:
-      - .env.docker
+      - .env
     environment:
       MYSQL_ROOT_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
       MYSQL_DATABASE: sist_log
@@ -25,7 +25,7 @@ services:
     container_name: sist_log_app
     restart: always
     env_file:
-      - .env.docker
+      - .env
     environment:
       SPRING_APPLICATION_NAME: sist_log
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}

@@ -1,9 +1,9 @@
-FROM amazoncorretto:21
+FROM eclipse-temurin:21-jre-alpine
 
 WORKDIR /app
 
 COPY target/*.jar app.jar
-COPY .env.docker /app/.env
+COPY .env /app/.env
 
 EXPOSE 8080
 

@@ -38,7 +38,7 @@
 ### ▶ Rodando o projeto
 1. Clone o repositório em uma IDE de sua escolha
 2. Acesse a pasta do projeto (raiz)
-3. Adicione na raiz do projeto (dentro de sist-log) dois arquivos que se chamam: .env e .env.docker. Obs.: Caso você não possua os arquivos que enviei separadamente, terá que criar ambos arquivos colocando praticamente a mesma informação em ambos:
+3. Adicione na raiz do projeto (dentro de sist-log) um arquivo que se chama: .env. Obs.: Caso você não possua o arquivo que enviei separadamente, terá que criar o próprio colocando praticamente a mesma informação a seguir:
     ```
     .env:
      SPRING_APPLICATION_NAME=sist-log
@@ -46,16 +46,15 @@
      SPRING_DATASOURCE_USERNAME=root
      SPRING_DATASOURCE_PASSWORD=senha (coloque a senha que desejar)
    
-    .env.docker:
-      SPRING_APPLICATION_NAME=sist-log
-      SPRING_DATASOURCE_URL=jdbc:mysql://mysql_sist_log:3306/sist_log?useSSL=false&allowPublicKeyRetrieval=true
-      SPRING_DATASOURCE_USERNAME=root
-      SPRING_DATASOURCE_PASSWORD=senha (coloque a senha que desejar)
-   
-   Obs.: Lembre-se, cada uma dessas informações fica no seu próprio arquivo.
+   Obs.: Utilize a porta default mesmo (3306) e o nome do banco de dados "sist_log" para não ter problemas.
     ```
+   **Imagem ilustrativa:** ![img_2.png](img_2.png)
+4. Execute no terminal o comando `mvn clean package` para gerar o arquivo .jar
 3. Após isso, execute o comando `docker-compose up --build` para subir o container do MySQL e da aplicação
 4. Acesse a URL `http://localhost:8080/swagger-ui.html` para acessar a documentação da API
+5. Recapitulando: 
+
+**Clone o repositório**, **criei o arquivo ".env"**, **gere o arquivo .jar**, **suba o container docker e acesse a documentação da API**.
 
 ---
 
